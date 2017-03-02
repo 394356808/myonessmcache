@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- 使用动态代理 -->
+<mapper namespace="cn.ssm.mapper.ItemsMapperCustcm" >
+<!-- 以下两个<cache>标签二选一,第一个可以输出日志,第二个不输出日志 只要在对应的mapper配置文件中加入<cache />标签即可-->	
+    <cache type="org.mybatis.caches.ehcache.LoggingEhcache">
+     <property name="timeToIdleSeconds" value="3600"/><!--1 hour-->  
+    <property name="timeToLiveSeconds" value="3600"/><!--1 hour-->  
+    <property name="maxEntriesLocalHeap" value="1000"/>  
+    <property name="maxEntriesLocalDisk" value="10000000"/>  
+    <property name="memoryStoreEvictionPolicy" value="LRU"/>  
+    </cache>	
+<!-- 定义商品查询的sql片段 -->
+<sql id="query_items_where">
+<!-- 使用动态sql，通过if判断，满足条件进行sql拼接 -->
+<!-- 商品查询条件通过ItemsQueryVo包装对象中itemsCustom属性传递 -->
+<if test="itemsCustom!=null">
+<if test="itemsCustom.name!=null and itemsCustom.name!=''">
+items.name like '%${itemsCustom.name}%'
+</if>
+</if>
+</sql>
+
+<!-- 商品列表查询 传入包装对象输出扩展对象-->
+<select id="findItemsList" parameterType="cn.ssm.po.ItemsQueryVo" resultType="cn.ssm.po.ItemsCustom" useCache="false">
+select * from items 
+<where>
+<include refid="query_items_where"></include>
+</where>
+
+</select>
+</mapper>
